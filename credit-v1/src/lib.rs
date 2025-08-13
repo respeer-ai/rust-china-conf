@@ -1,7 +1,7 @@
 use async_graphql::{Request, Response, SimpleObject};
 use linera_sdk::{
-    linera_base_types::{Amount, ApplicationId, ContractAbi, AccountOwner, ServiceAbi, Timestamp},
     graphql::GraphQLMutationRoot,
+    linera_base_types::{AccountOwner, Amount, ApplicationId, ContractAbi, ServiceAbi, Timestamp},
 };
 use serde::{Deserialize, Serialize};
 use thiserror::Error;

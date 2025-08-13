@@ -2,20 +2,17 @@
 
 mod state;
 
-use std::sync::Arc;
-
-use async_graphql::{EmptySubscription, Object, Schema};
+use self::state::CreditState;
+use async_graphql::{EmptySubscription, Request, Response, Schema};
+use credit_v1::Operation;
 use linera_sdk::{
     graphql::GraphQLMutationRoot, linera_base_types::WithServiceAbi, views::View, Service,
     ServiceRuntime,
 };
-
-use credit_v1::Operation;
-
-use self::state::CreditState;
+use std::sync::Arc;
 
 pub struct CreditService {
-    state: CreditState,
+    state: Arc<CreditState>,
     runtime: Arc<ServiceRuntime<Self>>,
 }
 
@@ -33,66 +30,18 @@ impl Service for CreditService {
             .await
             .expect("Failed to load state");
         CreditService {
-            state,
+            state: Arc::new(state),
             runtime: Arc::new(runtime),
         }
     }
 
-    async fn handle_query(&self, query: Self::Query) -> Self::QueryResponse {
-        Schema::build(
-            QueryRoot {
-                value: *self.state.value.get(),
-            },
+    async fn handle_query(&self, request: Request) -> Response {
+        let schema = Schema::build(
+            self.state.clone(),
             Operation::mutation_root(self.runtime.clone()),
             EmptySubscription,
         )
-        .finish()
-        .execute(query)
-        .await
-    }
-}
-
-struct QueryRoot {
-    value: u64,
-}
-
-#[Object]
-impl QueryRoot {
-    async fn value(&self) -> &u64 {
-        &self.value
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::sync::Arc;
-
-    use async_graphql::{Request, Response, Value};
-    use futures::FutureExt as _;
-    use linera_sdk::{util::BlockingWait, views::View, Service, ServiceRuntime};
-    use serde_json::json;
-
-    use super::{CreditService, CreditState};
-
-    #[test]
-    fn query() {
-        let value = 60u64;
-        let runtime = Arc::new(ServiceRuntime::<CreditService>::new());
-        let mut state = CreditState::load(runtime.root_view_storage_context())
-            .blocking_wait()
-            .expect("Failed to read from mock key value store");
-        state.value.set(value);
-
-        let service = CreditService { state, runtime };
-        let request = Request::new("{ value }");
-
-        let response = service
-            .handle_query(request)
-            .now_or_never()
-            .expect("Query should not await anything");
-
-        let expected = Response::new(Value::from_json(json!({"value": 60})).unwrap());
-
-        assert_eq!(response, expected)
+        .finish();
+        schema.execute(request).await
     }
 }

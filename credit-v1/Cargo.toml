@@ -13,9 +13,12 @@ bcs.workspace = true
 thiserror.workspace = true
 log.workspace = true
 
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+linera-sdk = { workspace = true, features = ["test", "wasmer"] }
+tokio = { workspace = true, features = ["rt", "sync"] }
+
 [dev-dependencies]
-linera-sdk = { version = "0.15.0", git = "https://github.com/linera-io/linera-protocol.git", features = ["test", "wasmer"] }
-tokio = { version = "1.40", features = ["rt", "sync"] }
+linera-sdk = { workspace = true, features = ["test"] }
 
 [[bin]]
 name = "credit_contract"
