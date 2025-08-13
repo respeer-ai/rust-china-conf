@@ -1,0 +1,32 @@
+[package]
+name = "credit-v1"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-graphql.workspace = true
+linera-sdk.workspace = true
+futures.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+bcs.workspace = true
+thiserror.workspace = true
+log.workspace = true
+
+[dev-dependencies]
+linera-sdk = { version = "0.15.0", git = "https://github.com/linera-io/linera-protocol.git", features = ["test", "wasmer"] }
+tokio = { version = "1.40", features = ["rt", "sync"] }
+
+[[bin]]
+name = "credit_contract"
+path = "src/contract.rs"
+
+[[bin]]
+name = "credit_service"
+path = "src/service.rs"
+
+[profile.release]
+debug = true
+lto = true
+opt-level = 'z'
+strip = 'debuginfo'
