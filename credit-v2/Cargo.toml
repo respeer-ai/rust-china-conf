@@ -1,5 +1,5 @@
 [package]
-name = "credit-v1"
+name = "credit-v2"
 version = "0.1.0"
 edition = "2021"
 
@@ -21,10 +21,10 @@ tokio = { workspace = true, features = ["rt", "sync"] }
 linera-sdk = { workspace = true, features = ["test"] }
 
 [[bin]]
-name = "credit_v1_contract"
+name = "credit_v2_contract"
 path = "src/contract.rs"
 
 [[bin]]
-name = "credit_v1_service"
+name = "credit_v2_service"
 path = "src/service.rs"
 

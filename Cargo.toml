@@ -1,9 +1,11 @@
 [workspace]
 members = [
     "credit-v1",
+    "credit-v2",
 ]
 default-members = [
     "credit-v1",
+    "credit-v2",
 ]
 resolver = "2"
 
@@ -37,6 +39,7 @@ tracing = "0.1.40"
 base64 = "0.13"
 
 credit-v1 = { path = "./credit-v1" }
+credit-v2 = { path = "./credit-v2" }
 
 [profile.release]
 debug = true
