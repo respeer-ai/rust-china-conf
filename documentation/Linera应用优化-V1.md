@@ -43,9 +43,9 @@ contract/（合约模块）
 
    └── message/（消息处理器）
 
-       ├── receive\_funds.rs
+       ├── receive_funds.rs
 
-       └── sync\_credit.rs
+       └── sync_credit.rs
 
 service/（内部服务模块）
 
@@ -55,7 +55,7 @@ service/（内部服务模块）
 
 ├── errors.rs（服务错误定义）
 
-└── credit\_score.rs（信用分计算逻辑）
+└── credit_score.rs（信用分计算逻辑）
 
 state/（状态模块）
 
@@ -93,9 +93,9 @@ state/（状态模块）
 ```
 // contract/mod.rs
 
-use linera\_contract::Contract;
+use linera_contract::Contract;
 
-use linera\_sdk::types::ChainId;
+use linera_sdk::types::ChainId;
 
 use std::sync::Arc;
 
@@ -127,7 +127,7 @@ pub struct CreditContract {
 
 }
 
-\#\[async\_trait]
+\#\[async_trait]
 
 impl Contract for CreditContract {
 
@@ -139,9 +139,9 @@ impl Contract for CreditContract {
 
    /// 加载合约状态与依赖
 
-   async fn load(runtime: linera\_contract::ContractRuntime\<Self>) -> Self {
+   async fn load(runtime: linera_contract::ContractRuntime\<Self>) -> Self {
 
-       let state = CreditStateStorage::load(runtime.root\_view\_storage\_context())
+       let state = CreditStateStorage::load(runtime.root_view_storage_context())
 
            .await
 
@@ -159,7 +159,7 @@ impl Contract for CreditContract {
 
    /// 处理链上操作：通过工厂模式分发到对应处理器
 
-   async fn execute\_operation(\&mut self, operation: Operation) -> Result<(), ContractError> {
+   async fn execute_operation(\&mut self, operation: Operation) -> Result<(), ContractError> {
 
        let mut handler = HandlerFactory::create(\&operation, \&mut self.state, \&self.runtime)?;
 
@@ -169,7 +169,7 @@ impl Contract for CreditContract {
 
        for event in result.events {
 
-           self.runtime.send\_message(event, self.runtime.chain\_id())?;
+           self.runtime.send_message(event, self.runtime.chain_id())?;
 
        }
 
@@ -179,9 +179,9 @@ impl Contract for CreditContract {
 
    /// 处理跨链消息：同理分发到消息处理器
 
-   async fn execute\_message(\&mut self, message: Message) -> Result\<Response, ContractError> {
+   async fn execute_message(\&mut self, message: Message) -> Result\<Response, ContractError> {
 
-       // 实现逻辑与execute\_operation类似
+       // 实现逻辑与execute_operation类似
 
        Ok(Response::Empty)
 
@@ -241,7 +241,7 @@ pub type HandlerOutcome = Result\<HandlerResult, HandlerError>;
 
 /// 处理器通用接口
 
-\#\[async\_trait]
+\#\[async_trait]
 
 pub trait Handler {
 
@@ -331,7 +331,7 @@ pub mod message;
 ```
 // contract/handlers/operation/transfer.rs
 
-use async\_trait::async\_trait;
+use async_trait::async_trait;
 
 use crate::{
 
@@ -359,11 +359,11 @@ pub struct TransferHandler<'a> {
 
    runtime: &'a dyn RuntimeContext,
 
-   from: linera\_sdk::types::AccountOwner,
+   from: linera_sdk::types::AccountOwner,
 
-   to: linera\_sdk::types::AccountOwner,
+   to: linera_sdk::types::AccountOwner,
 
-   amount: linera\_sdk::types::Amount,
+   amount: linera_sdk::types::Amount,
 
 }
 
@@ -375,11 +375,11 @@ impl<'a> TransferHandler<'a> {
 
        runtime: &'a impl RuntimeContext,
 
-       from: linera\_sdk::types::AccountOwner,
+       from: linera_sdk::types::AccountOwner,
 
-       to: linera\_sdk::types::AccountOwner,
+       to: linera_sdk::types::AccountOwner,
 
-       amount: linera\_sdk::types::Amount,
+       amount: linera_sdk::types::Amount,
 
    ) -> Self {
 
@@ -401,7 +401,7 @@ impl<'a> TransferHandler<'a> {
 
 }
 
-\#\[async\_trait]
+\#\[async_trait]
 
 impl<'a> Handler for TransferHandler<'a> {
 
@@ -409,9 +409,9 @@ impl<'a> Handler for TransferHandler<'a> {
 
        // 1. 权限校验（通过运行时接口）
 
-       let signer = self.runtime.authenticated\_signer()
+       let signer = self.runtime.authenticated_signer()
 
-           .ok\_or(HandlerError::Unauthenticated)?;
+           .ok_or(HandlerError::Unauthenticated)?;
 
        if signer != self.from {
 
@@ -421,7 +421,7 @@ impl<'a> Handler for TransferHandler<'a> {
 
        // 2. 执行转账（通过状态接口）
 
-       let now = self.runtime.system\_time();
+       let now = self.runtime.system_time();
 
        self.state.transfer(
 
@@ -433,7 +433,7 @@ impl<'a> Handler for TransferHandler<'a> {
 
            now,
 
-       ).await.map\_err(HandlerError::StateError)?;
+       ).await.map_err(HandlerError::StateError)?;
 
        // 3. 返回标准化结果
 
@@ -475,7 +475,7 @@ use thiserror::Error;
 
 use crate::state::errors::StateError;
 
-use linera\_sdk::error::RuntimeError;
+use linera_sdk::error::RuntimeError;
 
 \#\[derive(Debug, Error)]
 
@@ -529,7 +529,7 @@ pub enum HandlerError {
 ```
 // state/interfaces/balance.rs
 
-use async\_trait::async\_trait;
+use async_trait::async_trait;
 
 use crate::{
 
@@ -541,7 +541,7 @@ use crate::{
 
 /// 余额领域接口：仅包含余额相关操作
 
-\#\[async\_trait]
+\#\[async_trait]
 
 pub trait BalanceState {
 
@@ -559,7 +559,7 @@ pub trait BalanceState {
 
    ) -> Result<(), StateError>;
 
-   async fn get\_balance(\&self, owner: \&AccountOwner) -> Result\<Amount, StateError>;
+   async fn get_balance(\&self, owner: \&AccountOwner) -> Result\<Amount, StateError>;
 
 }
 ```
@@ -569,7 +569,7 @@ pub trait BalanceState {
 ```
 // state/interfaces/reward.rs
 
-use async\_trait::async\_trait;
+use async_trait::async_trait;
 
 use crate::{
 
@@ -581,7 +581,7 @@ use crate::{
 
 /// 奖励领域接口：仅包含奖励相关操作
 
-\#\[async\_trait]
+\#\[async_trait]
 
 pub trait RewardState {
 
@@ -597,7 +597,7 @@ pub trait RewardState {
 
    ) -> Result<(), StateError>;
 
-   async fn get\_reward\_history(\&self, owner: \&AccountOwner) -> Result\<Vec\<Amount>, StateError>;
+   async fn get_reward_history(\&self, owner: \&AccountOwner) -> Result\<Vec\<Amount>, StateError>;
 
 }
 ```
@@ -631,9 +631,9 @@ mod reward;
 ```
 // contract/runtime.rs
 
-use async\_trait::async\_trait;
+use async_trait::async_trait;
 
-use linera\_sdk::{
+use linera_sdk::{
 
    types::{AccountOwner, ChainId, Timestamp},
 
@@ -645,17 +645,17 @@ use crate::contract::types::Message;
 
 /// 运行时能力抽象接口
 
-\#\[async\_trait]
+\#\[async_trait]
 
 pub trait RuntimeContext {
 
-   fn chain\_id(\&self) -> ChainId;
+   fn chain_id(\&self) -> ChainId;
 
-   fn system\_time(\&self) -> Timestamp;
+   fn system_time(\&self) -> Timestamp;
 
-   fn authenticated\_signer(\&self) -> Option\<AccountOwner>;
+   fn authenticated_signer(\&self) -> Option\<AccountOwner>;
 
-   fn send\_message(\&self, msg: Message, target: ChainId) -> Result<(), crate::contract::errors::HandlerError>;
+   fn send_message(\&self, msg: Message, target: ChainId) -> Result<(), crate::contract::errors::HandlerError>;
 
 }
 
@@ -677,33 +677,33 @@ impl ContractRuntimeAdapter {
 
 }
 
-\#\[async\_trait]
+\#\[async_trait]
 
 impl RuntimeContext for ContractRuntimeAdapter {
 
-   fn chain\_id(\&self) -> ChainId {
+   fn chain_id(\&self) -> ChainId {
 
-       self.inner.chain\_id()
-
-   }
-
-   fn system\_time(\&self) -> Timestamp {
-
-       self.inner.current\_time()
+       self.inner.chain_id()
 
    }
 
-   fn authenticated\_signer(\&self) -> Option\<AccountOwner> {
+   fn system_time(\&self) -> Timestamp {
 
-       self.inner.authenticated\_signer()
+       self.inner.current_time()
 
    }
 
-   fn send\_message(\&self, msg: Message, target: ChainId) -> Result<(), crate::contract::errors::HandlerError> {
+   fn authenticated_signer(\&self) -> Option\<AccountOwner> {
 
-       self.inner.send\_message(msg, target)
+       self.inner.authenticated_signer()
 
-           .map\_err(|e| crate::contract::errors::HandlerError::RuntimeError(e))
+   }
+
+   fn send_message(\&self, msg: Message, target: ChainId) -> Result<(), crate::contract::errors::HandlerError> {
+
+       self.inner.send_message(msg, target)
+
+           .map_err(|e| crate::contract::errors::HandlerError::RuntimeError(e))
 
    }
 
@@ -729,7 +729,7 @@ impl RuntimeContext for ContractRuntimeAdapter {
 
 use serde::{Deserialize, Serialize};
 
-use linera\_sdk::views::{View, MapView};
+use linera_sdk::views::{View, MapView};
 
 use crate::state::types::AccountOwner;
 
@@ -755,7 +755,7 @@ impl BalanceMap {
 
    pub async fn set(\&mut self, owner: AccountOwner, amount: u64) -> Result<(), String> {
 
-       self.inner.insert(owner, amount).await.map\_err(|e| e.to\_string())
+       self.inner.insert(owner, amount).await.map_err(|e| e.to_string())
 
    }
 
@@ -771,13 +771,13 @@ impl BalanceMap {
 
        let current = self.get(\&owner).await;
 
-       let new\_value = f(current);
+       let new_value = f(current);
 
-       match new\_value {
+       match new_value {
 
            Some(v) => self.set(owner, v).await,
 
-           None => self.inner.remove(\&owner).await.map\_err(|e| e.to\_string()),
+           None => self.inner.remove(\&owner).await.map_err(|e| e.to_string()),
 
        }
 
@@ -787,17 +787,17 @@ impl BalanceMap {
 
 // 实现Linera的View trait（用于持久化）
 
-\#\[async\_trait]
+\#\[async_trait]
 
 impl View for BalanceMap {
 
    type Error = String;
 
-   async fn load(context: \&linera\_sdk::views::ViewStorageContext) -> Result\<Self, Self::Error> {
+   async fn load(context: \&linera_sdk::views::ViewStorageContext) -> Result\<Self, Self::Error> {
 
        Ok(Self {
 
-           inner: MapView::load("balances", context).await.map\_err(|e| e.to\_string())?,
+           inner: MapView::load("balances", context).await.map_err(|e| e.to_string())?,
 
        })
 
@@ -805,7 +805,7 @@ impl View for BalanceMap {
 
    async fn save(\&mut self) -> Result<(), Self::Error> {
 
-       self.inner.save().await.map\_err(|e| e.to\_string())
+       self.inner.save().await.map_err(|e| e.to_string())
 
    }
 
@@ -819,9 +819,9 @@ impl View for BalanceMap {
 ```
 // state/storage.rs
 
-use async\_trait::async\_trait;
+use async_trait::async_trait;
 
-use linera\_sdk::views::ViewStorageContext;
+use linera_sdk::views::ViewStorageContext;
 
 use crate::{
 
@@ -847,7 +847,7 @@ pub struct CreditStateStorage {
 
    // 其他状态模型（如奖励记录）
 
-   storage\_context: ViewStorageContext,
+   storage_context: ViewStorageContext,
 
 }
 
@@ -857,13 +857,13 @@ impl CreditStateStorage {
 
    pub async fn load(context: ViewStorageContext) -> Result\<Self, StateError> {
 
-       let balances = BalanceMap::load(\&context).await.map\_err(StateError::Storage)?;
+       let balances = BalanceMap::load(\&context).await.map_err(StateError::Storage)?;
 
        Ok(Self {
 
            balances,
 
-           storage\_context: context,
+           storage_context: context,
 
        })
 
@@ -871,7 +871,7 @@ impl CreditStateStorage {
 
    /// 事务化操作：确保状态一致性
 
-   async fn with\_transaction\<F, R>(\&mut self, f: F) -> Result\<R, StateError>
+   async fn with_transaction\<F, R>(\&mut self, f: F) -> Result\<R, StateError>
 
    where
 
@@ -883,7 +883,7 @@ impl CreditStateStorage {
 
        let result = f(self).await?;
 
-       self.balances.save().await.map\_err(StateError::Storage)?;
+       self.balances.save().await.map_err(StateError::Storage)?;
 
        Ok(result)
 
@@ -893,7 +893,7 @@ impl CreditStateStorage {
 
 /// 实现余额领域接口
 
-\#\[async\_trait]
+\#\[async_trait]
 
 impl BalanceState for CreditStateStorage {
 
