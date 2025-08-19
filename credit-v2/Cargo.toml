@@ -12,6 +12,7 @@ serde_json.workspace = true
 bcs.workspace = true
 thiserror.workspace = true
 log.workspace = true
+async-trait.workspace = true
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 linera-sdk = { workspace = true, features = ["test", "wasmer"] }

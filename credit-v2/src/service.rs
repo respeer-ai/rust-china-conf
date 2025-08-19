@@ -1,10 +1,8 @@
 #![cfg_attr(target_arch = "wasm32", no_main)]
 
-mod state;
-
-use self::state::CreditState;
 use async_graphql::{EmptySubscription, Request, Response, Schema};
-use credit_v2::Operation;
+use credit_v2::abi::Operation;
+use credit_v2::state::CreditState;
 use linera_sdk::{
     graphql::GraphQLMutationRoot, linera_base_types::WithServiceAbi, views::View, Service,
     ServiceRuntime,
@@ -19,7 +17,7 @@ pub struct CreditService {
 linera_sdk::service!(CreditService);
 
 impl WithServiceAbi for CreditService {
-    type Abi = credit_v2::CreditAbi;
+    type Abi = credit_v2::abi::CreditAbi;
 }
 
 impl Service for CreditService {

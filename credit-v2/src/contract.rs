@@ -1,9 +1,9 @@
 #![cfg_attr(target_arch = "wasm32", no_main)]
 
-mod state;
-
-use self::state::CreditState;
-use credit_v2::{CreditAbi, CreditError, InstantiationArgument, Message, Operation};
+use credit_v2::abi::{CreditAbi, CreditError, Message, Operation};
+use credit_v2::instantiation_argument::InstantiationArgument;
+use credit_v2::interfaces::state::StateInterface;
+use credit_v2::state::CreditState;
 use linera_sdk::{
     linera_base_types::{AccountOwner, Amount, ApplicationId, ChainId, WithContractAbi},
     views::{RootView, View},
@@ -36,7 +36,7 @@ impl Contract for CreditContract {
 
     async fn instantiate(&mut self, argument: InstantiationArgument) {
         self.runtime.application_parameters();
-        self.state.initialize_credit(argument).await;
+        self.state.instantiate(argument);
     }
 
     async fn execute_operation(&mut self, operation: Operation) -> Self::Response {
@@ -194,7 +194,7 @@ impl CreditContract {
         &mut self,
         arg: InstantiationArgument,
     ) -> Result<(), CreditError> {
-        self.state.initialize_credit(arg).await;
+        self.state.instantiate(arg);
         Ok(())
     }
 
@@ -221,7 +221,7 @@ impl CreditContract {
         if self.require_message_origin_chain_id()? != self.runtime.application_creator_chain_id() {
             return Err(CreditError::OperationNotAllowed);
         }
-        self.state.set_reward_callers(application_ids.clone()).await;
+        self.state.set_reward_callers(application_ids.clone());
         Ok(())
     }
 
@@ -232,9 +232,7 @@ impl CreditContract {
         if self.require_message_origin_chain_id()? != self.runtime.application_creator_chain_id() {
             return Err(CreditError::OperationNotAllowed);
         }
-        self.state
-            .set_transfer_callers(application_ids.clone())
-            .await;
+        self.state.set_transfer_callers(application_ids.clone());
         Ok(())
     }
 

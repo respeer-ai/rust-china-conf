@@ -1,7 +1,13 @@
 use std::cmp::Ordering;
 
+use crate::interfaces::state::StateInterface;
+use crate::{
+    abi::CreditError,
+    instantiation_argument::InstantiationArgument,
+    types::{AgeAmount, AgeAmounts},
+};
 use async_graphql::SimpleObject;
-use credit_v2::{AgeAmount, AgeAmounts, CreditError, InstantiationArgument};
+use async_trait::async_trait;
 use linera_sdk::{
     linera_base_types::{AccountOwner, Amount, ApplicationId, Timestamp},
     views::{linera_views, MapView, RegisterView, RootView, SetView, ViewStorageContext},
@@ -19,9 +25,11 @@ pub struct CreditState {
     pub transfer_callers: SetView<ApplicationId>,
 }
 
-#[allow(dead_code)]
-impl CreditState {
-    pub(crate) async fn initialize_credit(&mut self, mut argument: InstantiationArgument) {
+#[async_trait]
+impl StateInterface for CreditState {
+    type Error = CreditError;
+
+    fn instantiate(&mut self, mut argument: InstantiationArgument) {
         if argument.initial_supply.eq(&Amount::ZERO) {
             argument.initial_supply = Amount::from_tokens(100000000);
         }
@@ -30,27 +38,22 @@ impl CreditState {
         self.amount_alive_ms.set(argument.amount_alive_ms);
     }
 
-    pub(crate) async fn instantiation_argument(
-        &self,
-    ) -> Result<InstantiationArgument, CreditError> {
-        Ok(InstantiationArgument {
+    fn instantiation_argument(&self) -> InstantiationArgument {
+        InstantiationArgument {
             initial_supply: *self._initial_supply.get(),
             amount_alive_ms: *self.amount_alive_ms.get(),
-        })
-    }
-
-    pub(crate) async fn initial_supply(&self) -> Amount {
-        *self._initial_supply.get()
-    }
-
-    pub(crate) async fn balance(&self, owner: Option<AccountOwner>) -> Amount {
-        match owner {
-            Some(owner) => self.balances.get(&owner).await.unwrap().unwrap().sum(),
-            None => *self._balance.get(),
         }
     }
 
-    pub(crate) async fn reward(
+    fn initial_supply(&self) -> Amount {
+        *self._initial_supply.get()
+    }
+
+    async fn balance(&self, owner: AccountOwner) -> Amount {
+        self.balances.get(&owner).await.unwrap().unwrap().sum()
+    }
+
+    async fn reward(
         &mut self,
         owner: AccountOwner,
         amount: Amount,
@@ -112,7 +115,7 @@ impl CreditState {
         }
     }
 
-    pub(crate) async fn liquidate(&mut self, now: Timestamp) {
+    async fn liquidate(&mut self, now: Timestamp) {
         let owners = self.balances.indices().await.unwrap();
         for owner in owners {
             let mut amounts = match self.balances.get(&owner).await {
@@ -137,19 +140,19 @@ impl CreditState {
         }
     }
 
-    pub(crate) async fn set_reward_callers(&mut self, application_ids: Vec<ApplicationId>) {
+    fn set_reward_callers(&mut self, application_ids: Vec<ApplicationId>) {
         application_ids
             .iter()
             .for_each(|application_id| self.reward_callers.insert(application_id).unwrap())
     }
 
-    pub(crate) async fn set_transfer_callers(&mut self, application_ids: Vec<ApplicationId>) {
+    fn set_transfer_callers(&mut self, application_ids: Vec<ApplicationId>) {
         application_ids
             .iter()
             .for_each(|application_id| self.transfer_callers.insert(application_id).unwrap())
     }
 
-    pub(crate) async fn transfer(
+    async fn transfer(
         &mut self,
         from: AccountOwner,
         to: AccountOwner,
