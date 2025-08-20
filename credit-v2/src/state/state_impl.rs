@@ -1,16 +1,14 @@
 use std::cmp::Ordering;
 
 use crate::interfaces::state::StateInterface;
+use crate::state::CreditState;
 use crate::{
     abi::CreditError,
     instantiation_argument::InstantiationArgument,
     types::{AgeAmount, AgeAmounts},
 };
 use async_trait::async_trait;
-use linera_sdk::{
-    linera_base_types::{AccountOwner, Amount, ApplicationId, Timestamp},
-};
-use crate::state::CreditState;
+use linera_sdk::linera_base_types::{AccountOwner, Amount, ApplicationId, Timestamp};
 
 #[async_trait]
 impl StateInterface for CreditState {
