@@ -1,8 +1,8 @@
 use crate::instantiation_argument::InstantiationArgument;
-use async_graphql::{Request, Response, SimpleObject};
+use async_graphql::{Request, Response};
 use linera_sdk::{
     graphql::GraphQLMutationRoot,
-    linera_base_types::{AccountOwner, Amount, ApplicationId, ContractAbi, ServiceAbi, Timestamp},
+    linera_base_types::{AccountOwner, Amount, ApplicationId, ContractAbi, ServiceAbi},
 };
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
