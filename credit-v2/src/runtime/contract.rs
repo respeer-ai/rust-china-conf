@@ -1,33 +1,61 @@
-use linera_sdk::{
-    ContractRuntime,
-    linera_base_types::{AccountOwner, ChainId, Timestamp, Message},
-};
-use super::errors::RuntimeError;
+use std::{cell::RefCell, rc::Rc};
 
-pub struct ContractRuntimeAdapter<T> {
-    runtime: Box<dyn ContractRuntime<T>>,
+use super::errors::RuntimeError;
+use crate::{
+    abi::Message,
+    interfaces::runtime::{base::BaseRuntimeContext, contract::ContractRuntimeContext},
+};
+use linera_sdk::{
+    linera_base_types::{AccountOwner, ChainId, Timestamp},
+    Contract, ContractRuntime,
+};
+
+pub struct ContractRuntimeAdapter<T: Contract> {
+    runtime: Rc<RefCell<ContractRuntime<T>>>,
 }
 
-impl<T> ContractRuntimeContext for ContractRuntimeAdapter<T> {
+impl<T: Contract> ContractRuntimeAdapter<T> {
+    pub fn new(runtime: Rc<RefCell<ContractRuntime<T>>>) -> Self {
+        Self { runtime }
+    }
+}
+
+impl<T: Contract<Message = Message>> BaseRuntimeContext for ContractRuntimeAdapter<T> {
+    fn chain_id(&mut self) -> ChainId {
+        self.runtime.borrow_mut().chain_id()
+    }
+
+    fn system_time(&mut self) -> Timestamp {
+        self.runtime.borrow_mut().system_time()
+    }
+}
+
+impl<T: Contract<Message = Message>> ContractRuntimeContext for ContractRuntimeAdapter<T> {
     type Error = RuntimeError;
 
-    fn authenticated_signer(&self) -> Option<AccountOwner> {
-        self.runtime.authenticated_signer()
+    fn authenticated_signer(&mut self) -> Option<AccountOwner> {
+        self.runtime.borrow_mut().authenticated_signer()
     }
 
-    fn require_authenticated_signer(&self) -> Result<AccountOwner, RuntimeError> {
-        self.runtime.authenticated_signer().ok_or(RuntimeError::InvalidAuthenticatedSigner)
+    fn require_authenticated_signer(&mut self) -> Result<AccountOwner, RuntimeError> {
+        self.runtime
+            .borrow_mut()
+            .authenticated_signer()
+            .ok_or(RuntimeError::InvalidAuthenticatedSigner)
     }
 
-    fn send_message(&self, destionation: ChainId, message: Message) {
-        self.runtime.send_message(destination, message)
+    fn send_message(&mut self, destination: ChainId, message: Message) {
+        self.runtime.borrow_mut().send_message(destination, message)
     }
 
-    fn message_origin_chain_id(&self) -> Option<ChainId> {
-        self.runtime.message_oritin_chain_id()
+    fn message_origin_chain_id(&mut self) -> Option<ChainId> {
+        self.runtime.borrow_mut().message_origin_chain_id()
     }
 
-    fn require_message_origin_chain_id(&self) -> Result<ChainId, RuntimeError> {
-        self.runtime.message_oritin_chain_id().ok_or(RuntimeError::InvalidMessageOriginChainId)
+    fn require_message_origin_chain_id(&mut self) -> Result<ChainId, RuntimeError> {
+        self.runtime
+            .borrow_mut()
+            .message_origin_chain_id()
+            .ok_or(RuntimeError::InvalidMessageOriginChainId)
     }
 }

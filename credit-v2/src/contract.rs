@@ -1,5 +1,7 @@
 #![cfg_attr(target_arch = "wasm32", no_main)]
 
+use std::{cell::RefCell, rc::Rc};
+
 use credit_v2::abi::{CreditAbi, Message, Operation};
 use credit_v2::instantiation_argument::InstantiationArgument;
 use credit_v2::interfaces::state::StateInterface;
@@ -11,8 +13,8 @@ use linera_sdk::{
 };
 
 pub struct CreditContract {
-    state: CreditState,
-    runtime: ContractRuntime<Self>,
+    state: Rc<RefCell<CreditState>>,
+    runtime: Rc<RefCell<ContractRuntime<Self>>>,
 }
 
 linera_sdk::contract!(CreditContract);
@@ -31,77 +33,31 @@ impl Contract for CreditContract {
         let state = CreditState::load(runtime.root_view_storage_context())
             .await
             .expect("Failed to load state");
-        CreditContract { state, runtime }
+        CreditContract {
+            state: Rc::new(RefCell::new(state)),
+            runtime: Rc::new(RefCell::new(runtime)),
+        }
     }
 
     async fn instantiate(&mut self, argument: InstantiationArgument) {
-        self.runtime.application_parameters();
-        self.state.instantiate(argument);
+        self.runtime.borrow_mut().application_parameters();
+        self.state.borrow_mut().instantiate(argument);
     }
 
     async fn execute_operation(&mut self, operation: Operation) -> Self::Response {
-        match operation {
-            Operation::Liquidate => self.on_op_liquidate().expect("Failed OP: liquidate"),
-            Operation::SetRewardCallers { application_ids } => self
-                .on_op_set_reward_callers(application_ids)
-                .expect("Failed OP: set reward callers"),
-            Operation::SetTransferCallers { application_ids } => self
-                .on_op_set_transfer_callers(application_ids)
-                .expect("Failed OP: set transfer callers"),
-            Operation::Transfer { from, to, amount } => self
-                .on_op_transfer(from, to, amount)
-                .expect("Failed OP: transfer"),
-            Operation::TransferExt { to, amount } => self
-                .on_op_transfer_ext(to, amount)
-                .expect("Failed OP: transfer from application"),
-            Operation::RequestSubscribe => self
-                .on_op_request_subscribe()
-                .expect("Failed OP: subscribe"),
-            Operation::Reward { owner, amount } => {
-                self.on_op_reward(owner, amount).expect("Failed OP: reward")
-            }
-        }
+        self.on_op(&operation)
     }
 
     async fn execute_message(&mut self, message: Message) {
-        match message {
-            Message::InstantiationArgument { argument } => self
-                .on_msg_instantiation_argument(argument)
-                .await
-                .expect("Failed MSG: instantiation argument"),
-            Message::Liquidate => self
-                .on_msg_liquidate()
-                .await
-                .expect("Failed MSG: liquidate"),
-            Message::Reward { owner, amount } => self
-                .on_msg_reward(owner, amount)
-                .await
-                .expect("Failed MSG: reward"),
-            Message::SetRewardCallers { application_ids } => self
-                .on_msg_set_reward_callers(application_ids)
-                .await
-                .expect("Failed MSG: set reward callers"),
-            Message::SetTransferCallers { application_ids } => self
-                .on_msg_set_transfer_callers(application_ids)
-                .await
-                .expect("Failed MSG: set transfer callers"),
-            Message::Transfer { from, to, amount } => self
-                .on_msg_transfer(from, to, amount)
-                .await
-                .expect("Failed MSG: transfer"),
-            Message::TransferExt { to, amount } => self
-                .on_msg_transfer_ext(to, amount)
-                .await
-                .expect("Failed MSG: transfer from application"),
-            Message::RequestSubscribe => self
-                .on_msg_request_subscribe()
-                .await
-                .expect("Failed MSG: subscribe"),
-        }
+        self.on_message(&message)
     }
 
     async fn store(mut self) {
-        self.state.save().await.expect("Failed to save state");
+        self.state
+            .borrow_mut()
+            .save()
+            .await
+            .expect("Failed to save state");
     }
 }
 

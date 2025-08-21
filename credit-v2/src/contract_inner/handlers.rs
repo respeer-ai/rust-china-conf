@@ -1,9 +1,9 @@
 pub mod errors;
 
-use crate::abi::{Operation, Message};
-use errors::HandlerError;
+use crate::abi::{Message, Operation};
 use crate::interfaces::{runtime::contract::ContractRuntimeContext, state::StateInterface};
 use async_trait::async_trait;
+use errors::HandlerError;
 
 #[derive(Debug, Default)]
 pub struct HandlerOutcome {
@@ -18,20 +18,33 @@ pub trait Handler {
 pub struct HandlerFactory;
 
 impl HandlerFactory {
-    fn new_operation_handler(runtime: impl ContractRuntimeContext, mut state: impl StateInterface, op: &Operation) -> Result<Box<dyn Handler>, HandlerError> {
+    fn new_operation_handler(
+        runtime: impl ContractRuntimeContext,
+        state: &mut impl StateInterface,
+        op: &Operation,
+    ) -> Result<Box<dyn Handler>, HandlerError> {
         unimplemented!()
     }
 
-    fn new_message_handler(runtime: impl ContractRuntimeContext, mut state: impl StateInterface, msg: &Message) -> Result<Box<dyn Handler>, HandlerError> {
+    fn new_message_handler(
+        runtime: impl ContractRuntimeContext,
+        state: &mut impl StateInterface,
+        msg: &Message,
+    ) -> Result<Box<dyn Handler>, HandlerError> {
         unimplemented!()
     }
 
-    pub fn new(runtime: impl ContractRuntimeContext, mut state: impl StateInterface, op: Option<&Operation>, msg: Option<&Message>) -> Result<Box<dyn Handler>, HandlerError> {
+    pub fn new(
+        runtime: impl ContractRuntimeContext,
+        state: &mut impl StateInterface,
+        op: Option<&Operation>,
+        msg: Option<&Message>,
+    ) -> Result<Box<dyn Handler>, HandlerError> {
         if let Some(op) = op {
-            return HandlerFactory::new_operation_handler(runtime, state, op)
+            return HandlerFactory::new_operation_handler(runtime, state, op);
         }
         if let Some(msg) = msg {
-            return HandlerFactory::new_message_handler(runtime, state, msg)
+            return HandlerFactory::new_message_handler(runtime, state, msg);
         }
         Err(HandlerError::InvalidOperationAndMessage)
     }

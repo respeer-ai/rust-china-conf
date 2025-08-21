@@ -9,9 +9,11 @@ use thiserror::Error;
 
 pub struct CreditAbi;
 
+pub type OperationResponse = ();
+
 impl ContractAbi for CreditAbi {
     type Operation = Operation;
-    type Response = ();
+    type Response = OperationResponse;
 }
 
 impl ServiceAbi for CreditAbi {

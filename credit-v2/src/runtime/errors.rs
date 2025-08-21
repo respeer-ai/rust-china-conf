@@ -1,5 +1,5 @@
-use thiserror::Error;
 use linera_sdk::linera_base_types::AccountPermissionError;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum RuntimeError {
