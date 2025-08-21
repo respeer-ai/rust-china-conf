@@ -1,24 +1,10 @@
-use crate::CreditContract;
+use super::CreditContract;
 use credit_v2::abi::{CreditError, Message};
 use credit_v2::instantiation_argument::InstantiationArgument;
 use credit_v2::interfaces::state::StateInterface;
 use linera_sdk::linera_base_types::{AccountOwner, Amount, ApplicationId, ChainId};
 
 impl CreditContract {
-    pub fn require_message_origin_chain_id(&mut self) -> Result<ChainId, CreditError> {
-        match self.runtime.message_origin_chain_id() {
-            Some(message_id) => Ok(message_id),
-            None => Err(CreditError::InvalidMessageId),
-        }
-    }
-
-    pub fn require_authenticated_signer(&mut self) -> Result<AccountOwner, CreditError> {
-        match self.runtime.authenticated_signer() {
-            Some(owner) => Ok(owner),
-            None => Err(CreditError::InvalidSigner),
-        }
-    }
-
     pub fn on_op_liquidate(&mut self) -> Result<(), CreditError> {
         self.runtime
             .prepare_message(Message::Liquidate)
@@ -121,7 +107,7 @@ impl CreditContract {
         &mut self,
         application_ids: Vec<ApplicationId>,
     ) -> Result<(), CreditError> {
-        if self.require_message_origin_chain_id()? != self.runtime.application_creator_chain_id() {
+        if self.runtime.message_origin_chain_id().unwrap() != self.runtime.application_creator_chain_id() {
             return Err(CreditError::OperationNotAllowed);
         }
         self.state.set_reward_callers(application_ids.clone());
@@ -132,7 +118,7 @@ impl CreditContract {
         &mut self,
         application_ids: Vec<ApplicationId>,
     ) -> Result<(), CreditError> {
-        if self.require_message_origin_chain_id()? != self.runtime.application_creator_chain_id() {
+        if self.runtime.message_origin_chain_id().unwrap() != self.runtime.application_creator_chain_id() {
             return Err(CreditError::OperationNotAllowed);
         }
         self.state.set_transfer_callers(application_ids.clone());
@@ -156,7 +142,7 @@ impl CreditContract {
         to: AccountOwner,
         amount: Amount,
     ) -> Result<(), CreditError> {
-        let from = self.require_authenticated_signer()?;
+        let from = self.runtime.authenticated_signer().unwrap();
         self.state
             .transfer(from, to, amount, self.runtime.system_time())
             .await?;
@@ -168,3 +154,4 @@ impl CreditContract {
         Ok(())
     }
 }
+

@@ -1,6 +1,5 @@
 use linera_sdk::{
-    ContractRuntime,
-    linera_base_types::{AccountOwner, ChainId, Timestamp, Message},
+    linera_base_types::{ChainId, Timestamp},
 };
 
 pub trait BaseRuntimeContext {

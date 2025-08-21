@@ -5,7 +5,7 @@
 
 #![cfg(not(target_arch = "wasm32"))]
 
-use credit::Operation;
+use credit_v2::abi::Operation;
 use linera_sdk::test::{QueryOutcome, TestValidator};
 
 /// Tests setting and incrementing a counter
@@ -15,7 +15,7 @@ use linera_sdk::test::{QueryOutcome, TestValidator};
 #[tokio::test(flavor = "multi_thread")]
 async fn single_chain_test() {
     let (validator, module_id) =
-        TestValidator::with_current_module::<credit::CreditAbi, (), u64>().await;
+        TestValidator::with_current_module::<credit_v2::abi::CreditAbi, (), u64>().await;
     let mut chain = validator.new_chain().await;
 
     let initial_state = 10u64;

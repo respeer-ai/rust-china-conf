@@ -105,5 +105,4 @@ impl Contract for CreditContract {
     }
 }
 
-#[path = "contract/contract_impl.rs"]
 mod contract_impl;
