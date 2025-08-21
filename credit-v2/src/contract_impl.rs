@@ -1,14 +1,8 @@
-use std::{cell::RefCell, rc::Rc};
-
-use linera_sdk::linera_base_types::{AccountOwner, Amount, ApplicationId};
-
 use super::CreditContract;
 
 use credit_v2::{
-    abi::{CreditError, Message, Operation, OperationResponse},
+    abi::{Message, Operation, OperationResponse},
     contract_inner::handlers::HandlerFactory,
-    instantiation_argument::InstantiationArgument,
-    interfaces::state::StateInterface,
     runtime::contract::ContractRuntimeAdapter,
 };
 

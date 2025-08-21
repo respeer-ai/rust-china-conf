@@ -52,7 +52,7 @@ impl Contract for CreditContract {
         self.on_message(&message)
     }
 
-    async fn store(mut self) {
+    async fn store(self) {
         self.state
             .borrow_mut()
             .save()
