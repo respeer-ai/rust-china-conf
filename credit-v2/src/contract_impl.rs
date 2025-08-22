@@ -8,14 +8,19 @@ use credit_v2::{
 };
 
 impl CreditContract {
-    pub fn on_op(&mut self, op: &Operation) -> OperationResponse {
+    pub async fn on_op(&mut self, op: &Operation) -> OperationResponse {
         let runtime_context = ContractRuntimeAdapter::new(self.runtime.clone());
         let state_adapter = StateAdapter::new(self.state.clone());
 
-        let rc = match HandlerFactory::new(runtime_context, state_adapter, Some(op), None) {
+        let rc = match HandlerFactory::new(runtime_context, state_adapter, Some(op), None)
+            .unwrap()
+            .handle()
+            .await
+        {
             Ok(rc) => rc,
-            Err(err) => panic!("Failed OP {:?}: {err}", op),
+            Err(err) => panic!("Failed OP: {:?}: {err}", op),
         };
+
         // TODO: if messages are available, send it
         // TODO: if events are available, emit it
         ()

@@ -1,7 +1,7 @@
 pub mod errors;
 pub mod interfaces;
-pub mod types;
 pub mod operation;
+pub mod types;
 
 use crate::abi::{Message, Operation};
 use crate::interfaces::{runtime::contract::ContractRuntimeContext, state::StateInterface};
@@ -18,8 +18,10 @@ impl HandlerFactory {
         op: &Operation,
     ) -> Box<dyn Handler> {
         match op {
-            Operation::Transfer { .. } => Box::new(TransferHandler::new(runtime, state)),
-            _ => unimplemented!()
+            Operation::Transfer { from, to, amount } => {
+                Box::new(TransferHandler::new(runtime, state, from, to, amount))
+            }
+            _ => unimplemented!(),
         }
     }
 

@@ -1,24 +1,35 @@
-use async_trait::async_trait;
 use crate::{
-    interfaces::{
-        runtime::contract::ContractRuntimeContext,
-        state::StateInterface,
-    },
-    contract_inner::handlers::{
-        types::HandlerOutcome,
-        errors::HandlerError,
-        interfaces::Handler,
-    },
+    contract_inner::handlers::{errors::HandlerError, interfaces::Handler, types::HandlerOutcome},
+    interfaces::{runtime::contract::ContractRuntimeContext, state::StateInterface},
 };
+use async_trait::async_trait;
+
+use linera_sdk::linera_base_types::{AccountOwner, Amount};
 
 pub struct TransferHandler<R: ContractRuntimeContext, S: StateInterface> {
     runtime: R,
     state: S,
+
+    from: AccountOwner,
+    to: AccountOwner,
+    amount: Amount,
 }
 
 impl<R: ContractRuntimeContext, S: StateInterface> TransferHandler<R, S> {
-    pub fn new(runtime: R, state: S) -> Self {
-        Self { state, runtime }
+    pub fn new(
+        runtime: R,
+        state: S,
+        from: &AccountOwner,
+        to: &AccountOwner,
+        amount: &Amount,
+    ) -> Self {
+        Self {
+            state,
+            runtime,
+            from: *from,
+            to: *to,
+            amount: *amount,
+        }
     }
 }
 

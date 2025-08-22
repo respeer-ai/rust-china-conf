@@ -4,4 +4,3 @@ use crate::abi::Message;
 pub struct HandlerOutcome {
     pub messages: Vec<Message>,
 }
-

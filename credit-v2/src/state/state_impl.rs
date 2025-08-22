@@ -1,10 +1,7 @@
 use std::cmp::Ordering;
 
 use crate::interfaces::state::StateInterface;
-use crate::state::{
-    CreditState,
-    errors::StateError,
-};
+use crate::state::{errors::StateError, CreditState};
 use crate::{
     instantiation_argument::InstantiationArgument,
     types::{AgeAmount, AgeAmounts},

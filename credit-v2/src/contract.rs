@@ -45,7 +45,7 @@ impl Contract for CreditContract {
     }
 
     async fn execute_operation(&mut self, operation: Operation) -> Self::Response {
-        self.on_op(&operation)
+        self.on_op(&operation).await
     }
 
     async fn execute_message(&mut self, message: Message) {

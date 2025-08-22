@@ -2,15 +2,11 @@ use std::{cell::RefCell, rc::Rc};
 
 use super::errors::StateError;
 use crate::{
-    abi::Message,
+    instantiation_argument::InstantiationArgument, interfaces::state::StateInterface,
     state::CreditState,
-    interfaces::state::StateInterface,
-    instantiation_argument::InstantiationArgument,
-};
-use linera_sdk::{
-    linera_base_types::{AccountOwner, ChainId, Timestamp, Amount, ApplicationId},
 };
 use async_trait::async_trait;
+use linera_sdk::linera_base_types::{AccountOwner, Amount, ApplicationId, Timestamp};
 
 pub struct StateAdapter {
     state: Rc<RefCell<CreditState>>,
@@ -60,7 +56,9 @@ impl StateInterface for StateAdapter {
     }
 
     fn set_transfer_callers(&mut self, application_ids: Vec<ApplicationId>) {
-        self.state.borrow_mut().set_transfer_callers(application_ids)
+        self.state
+            .borrow_mut()
+            .set_transfer_callers(application_ids)
     }
 
     async fn transfer(
@@ -70,6 +68,9 @@ impl StateInterface for StateAdapter {
         amount: Amount,
         now: Timestamp,
     ) -> Result<(), Self::Error> {
-        self.state.borrow_mut().transfer(from, to, amount, now).await
+        self.state
+            .borrow_mut()
+            .transfer(from, to, amount, now)
+            .await
     }
 }
