@@ -1,18 +1,20 @@
 use std::cmp::Ordering;
 
 use crate::interfaces::state::StateInterface;
-use crate::state::CreditState;
+use crate::state::{
+    CreditState,
+    errors::StateError,
+};
 use crate::{
-    abi::CreditError,
     instantiation_argument::InstantiationArgument,
     types::{AgeAmount, AgeAmounts},
 };
 use async_trait::async_trait;
 use linera_sdk::linera_base_types::{AccountOwner, Amount, ApplicationId, Timestamp};
 
-#[async_trait]
+#[async_trait(?Send)]
 impl StateInterface for CreditState {
-    type Error = CreditError;
+    type Error = StateError;
 
     fn instantiate(&mut self, mut argument: InstantiationArgument) {
         if argument.initial_supply.eq(&Amount::ZERO) {
@@ -43,7 +45,7 @@ impl StateInterface for CreditState {
         owner: AccountOwner,
         amount: Amount,
         now: Timestamp,
-    ) -> Result<(), CreditError> {
+    ) -> Result<(), StateError> {
         match self.spendables.get(&owner).await {
             Ok(Some(spendable)) => {
                 self.spendables
@@ -62,7 +64,7 @@ impl StateInterface for CreditState {
                     self._balance.get(),
                     amount
                 );
-                // return Err(CreditError::InsufficientSupplyBalance)
+                // return Err(StateError::InsufficientSupplyBalance)
             }
             _ => {}
         }
@@ -80,7 +82,7 @@ impl StateInterface for CreditState {
                 });
                 match self.balances.insert(&owner, amounts) {
                     Ok(_) => Ok(()),
-                    Err(err) => Err(CreditError::ViewError(err)),
+                    Err(err) => Err(StateError::ViewError(err)),
                 }
             }
             _ => match self.balances.insert(
@@ -95,7 +97,7 @@ impl StateInterface for CreditState {
                 },
             ) {
                 Ok(_) => Ok(()),
-                Err(err) => Err(CreditError::ViewError(err)),
+                Err(err) => Err(StateError::ViewError(err)),
             },
         }
     }
@@ -143,10 +145,10 @@ impl StateInterface for CreditState {
         to: AccountOwner,
         amount: Amount,
         now: Timestamp,
-    ) -> Result<(), CreditError> {
+    ) -> Result<(), StateError> {
         match self.spendables.get(&from).await {
             Ok(Some(spendable)) => match spendable.cmp(&amount) {
-                Ordering::Less => Err(CreditError::InsufficientAccountBalance),
+                Ordering::Less => Err(StateError::InsufficientAccountBalance),
                 _ => {
                     self.spendables
                         .insert(&from, spendable.saturating_sub(amount))?;
@@ -215,7 +217,7 @@ impl StateInterface for CreditState {
                     Ok(())
                 }
             },
-            _ => return Err(CreditError::InsufficientAccountBalance),
+            _ => return Err(StateError::InsufficientAccountBalance),
         }
     }
 }

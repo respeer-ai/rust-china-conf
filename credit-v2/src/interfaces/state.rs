@@ -2,7 +2,7 @@ use crate::instantiation_argument::InstantiationArgument;
 use async_trait::async_trait;
 use linera_sdk::linera_base_types::{AccountOwner, Amount, ApplicationId, Timestamp};
 
-#[async_trait]
+#[async_trait(?Send)]
 pub trait StateInterface {
     type Error;
 

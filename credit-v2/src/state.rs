@@ -17,4 +17,6 @@ pub struct CreditState {
     pub transfer_callers: SetView<ApplicationId>,
 }
 
+pub mod errors;
 pub mod state_impl;
+pub mod adapter;

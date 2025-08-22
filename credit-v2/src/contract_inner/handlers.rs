@@ -1,50 +1,47 @@
 pub mod errors;
+pub mod interfaces;
+pub mod types;
+pub mod operation;
 
 use crate::abi::{Message, Operation};
 use crate::interfaces::{runtime::contract::ContractRuntimeContext, state::StateInterface};
-use async_trait::async_trait;
 use errors::HandlerError;
-
-#[derive(Debug, Default)]
-pub struct HandlerOutcome {
-    pub messages: Vec<Message>,
-}
-
-#[async_trait]
-pub trait Handler {
-    async fn handle(&mut self) -> Result<HandlerOutcome, HandlerError>;
-}
+use interfaces::Handler;
+use operation::transfer::TransferHandler;
 
 pub struct HandlerFactory;
 
 impl HandlerFactory {
     fn new_operation_handler(
-        runtime: impl ContractRuntimeContext,
-        state: &mut impl StateInterface,
+        runtime: impl ContractRuntimeContext + 'static,
+        state: impl StateInterface + 'static,
         op: &Operation,
-    ) -> Result<Box<dyn Handler>, HandlerError> {
-        unimplemented!()
+    ) -> Box<dyn Handler> {
+        match op {
+            Operation::Transfer { .. } => Box::new(TransferHandler::new(runtime, state)),
+            _ => unimplemented!()
+        }
     }
 
     fn new_message_handler(
         runtime: impl ContractRuntimeContext,
-        state: &mut impl StateInterface,
+        state: impl StateInterface,
         msg: &Message,
-    ) -> Result<Box<dyn Handler>, HandlerError> {
+    ) -> Box<dyn Handler> {
         unimplemented!()
     }
 
     pub fn new(
-        runtime: impl ContractRuntimeContext,
-        state: &mut impl StateInterface,
+        runtime: impl ContractRuntimeContext + 'static,
+        state: impl StateInterface + 'static,
         op: Option<&Operation>,
         msg: Option<&Message>,
     ) -> Result<Box<dyn Handler>, HandlerError> {
         if let Some(op) = op {
-            return HandlerFactory::new_operation_handler(runtime, state, op);
+            return Ok(HandlerFactory::new_operation_handler(runtime, state, op));
         }
         if let Some(msg) = msg {
-            return HandlerFactory::new_message_handler(runtime, state, msg);
+            return Ok(HandlerFactory::new_message_handler(runtime, state, msg));
         }
         Err(HandlerError::InvalidOperationAndMessage)
     }
