@@ -12,12 +12,12 @@ impl CreditContract {
         let runtime_context = ContractRuntimeAdapter::new(self.runtime.clone());
         let state_adapter = StateAdapter::new(self.state.clone());
 
-        let rc = match HandlerFactory::new(runtime_context, state_adapter, Some(op), None)
+        let outcome = match HandlerFactory::new(runtime_context, state_adapter, Some(op), None)
             .unwrap()
             .handle()
             .await
         {
-            Ok(rc) => rc,
+            Ok(outcome) => outcome,
             Err(err) => panic!("Failed OP: {:?}: {err}", op),
         };
 
@@ -30,8 +30,8 @@ impl CreditContract {
         let runtime_context = ContractRuntimeAdapter::new(self.runtime.clone());
         let state_adapter = StateAdapter::new(self.state.clone());
 
-        let rc = match HandlerFactory::new(runtime_context, state_adapter, None, Some(msg)) {
-            Ok(rc) => rc,
+        let outcome = match HandlerFactory::new(runtime_context, state_adapter, None, Some(msg)) {
+            Ok(outcome) => outcome,
             Err(err) => panic!("Failed MSG {:?}: {err}", msg),
         };
         // TODO: if messages are available, send it
