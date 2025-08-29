@@ -2,10 +2,12 @@
 members = [
     "credit-v1",
     "credit-v2",
+    "leaderboard",
 ]
 default-members = [
     "credit-v1",
     "credit-v2",
+    "leaderboard",
 ]
 resolver = "2"
 
@@ -40,6 +42,7 @@ base64 = "0.13"
 
 credit-v1 = { path = "./credit-v1" }
 credit-v2 = { path = "./credit-v2" }
+leaderboard = { path = "./leaderboard" }
 
 [profile.release]
 debug = true

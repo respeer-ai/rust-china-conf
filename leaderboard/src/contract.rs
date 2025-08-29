@@ -2,11 +2,11 @@
 
 use std::{cell::RefCell, rc::Rc};
 
-use credit_v2::{
-    abi::{CreditAbi, Message, Operation},
+use leaderboard::{
+    abi::{LeaderBoardAbi, Message, Operation},
     instantiation_argument::InstantiationArgument,
     interfaces::state::StateInterface,
-    state::CreditState,
+    state::LeaderBoardState,
 };
 use linera_sdk::{
     linera_base_types::WithContractAbi,
@@ -14,28 +14,28 @@ use linera_sdk::{
     Contract, ContractRuntime,
 };
 
-pub struct CreditContract {
-    state: Rc<RefCell<CreditState>>,
+pub struct LeaderBoardContract {
+    state: Rc<RefCell<LeaderBoardState>>,
     runtime: Rc<RefCell<ContractRuntime<Self>>>,
 }
 
-linera_sdk::contract!(CreditContract);
+linera_sdk::contract!(LeaderBoardContract);
 
-impl WithContractAbi for CreditContract {
-    type Abi = CreditAbi;
+impl WithContractAbi for LeaderBoardContract {
+    type Abi = LeaderBoardAbi;
 }
 
-impl Contract for CreditContract {
+impl Contract for LeaderBoardContract {
     type Message = Message;
     type InstantiationArgument = InstantiationArgument;
     type Parameters = ();
     type EventValue = ();
 
     async fn load(runtime: ContractRuntime<Self>) -> Self {
-        let state = CreditState::load(runtime.root_view_storage_context())
+        let state = LeaderBoardState::load(runtime.root_view_storage_context())
             .await
             .expect("Failed to load state");
-        CreditContract {
+        LeaderBoardContract {
             state: Rc::new(RefCell::new(state)),
             runtime: Rc::new(RefCell::new(runtime)),
         }
