@@ -6,7 +6,8 @@ use crate::{
     interfaces::runtime::{base::BaseRuntimeContext, contract::ContractRuntimeContext},
 };
 use linera_sdk::{
-    linera_base_types::{AccountOwner, ChainId, Timestamp},
+    abi::ContractAbi,
+    linera_base_types::{AccountOwner, ApplicationId, ChainId, Timestamp},
     Contract, ContractRuntime,
 };
 
@@ -57,5 +58,16 @@ impl<T: Contract<Message = Message>> ContractRuntimeContext for ContractRuntimeA
             .borrow_mut()
             .message_origin_chain_id()
             .ok_or(RuntimeError::InvalidMessageOriginChainId)
+    }
+
+    fn call_application<A: ContractAbi + Send>(
+        &mut self,
+        authenticated: bool,
+        application: ApplicationId<A>,
+        call: &A::Operation,
+    ) -> A::Response {
+        self.runtime
+            .borrow_mut()
+            .call_application(authenticated, application, call)
     }
 }
