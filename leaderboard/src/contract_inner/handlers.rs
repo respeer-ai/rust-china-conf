@@ -23,15 +23,46 @@ impl HandlerFactory {
             Operation::UpdateValue { owner, value } => {
                 Box::new(UpdateValueHandler::new(runtime, state, owner, value))
             }
+            Operation::ProposeOperator { operator } => {
+                unimplemented!()
+            }
+            Operation::ApproveOperator => {
+                unimplemented!()
+            }
+            Operation::RejectOperator => {
+                unimplemented!()
+            }
+            Operation::ConfirmOperator => {
+                unimplemented!()
+            }
+            Operation::UpdateCaller { caller } => {
+                unimplemented!()
+            }
         }
     }
 
     fn new_message_handler(
         _runtime: impl ContractRuntimeContext + AccessControl,
         _state: impl StateInterface,
-        _msg: &Message,
+        msg: &Message,
     ) -> Box<dyn Handler> {
-        unimplemented!()
+        match msg {
+            Message::ProposeOperator { operator } => {
+                unimplemented!()
+            }
+            Message::ApproveOperator => {
+                unimplemented!()
+            }
+            Message::RejectOperator => {
+                unimplemented!()
+            }
+            Message::ConfirmOperator => {
+                unimplemented!()
+            }
+            Message::UpdateCaller { caller } => {
+                unimplemented!()
+            }
+        }
     }
 
     pub fn new(

@@ -1,7 +1,7 @@
 use async_graphql::{Request, Response};
 use linera_sdk::{
     graphql::GraphQLMutationRoot,
-    linera_base_types::{AccountOwner, Amount, ContractAbi, ServiceAbi},
+    linera_base_types::{AccountOwner, Amount, ApplicationId, ContractAbi, ServiceAbi},
 };
 use serde::{Deserialize, Serialize};
 
@@ -27,10 +27,23 @@ pub enum Operation {
         owner: AccountOwner,
         value: Amount,
     },
+    ProposeOperator {
+        operator: AccountOwner,
+    },
+    ApproveOperator,
+    RejectOperator,
+    ConfirmOperator,
+    UpdateCaller {
+        caller: ApplicationId,
+    },
 }
 
 /// No message needed
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum Message {
-    Unused,
+    ProposeOperator { operator: AccountOwner },
+    ApproveOperator,
+    RejectOperator,
+    ConfirmOperator,
+    UpdateCaller { caller: ApplicationId },
 }
